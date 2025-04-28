@@ -26,6 +26,7 @@ log_period: 100
 pretrained_model_name_or_path: 'black-forest-labs/FLUX.1-dev'
 clip_model_name_or_path: 'ariG23498/clip-vit-large-patch14-text-flax'
 t5xxl_model_name_or_path: 'ariG23498/t5-v1-1-xxl-flax'
+use_auth_token: ''
 
 # Flux params
 flux_name: "flux-dev"

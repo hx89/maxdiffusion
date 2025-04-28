@@ -32,3 +32,4 @@ tokenizers==0.21.0
 torch==2.6.0
 torchvision==0.20.1
 transformers==4.48.1
+aqtp
