@@ -35,3 +35,4 @@ transformers==4.48.1
 aqtp
 imageio==2.37.0
 imageio-ffmpeg==0.6.0
+aqtp
