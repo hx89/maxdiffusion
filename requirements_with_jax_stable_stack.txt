@@ -8,7 +8,7 @@ ftfy
 git+https://github.com/mlperf/logging.git
 google-cloud-storage==2.17.0
 grain-nightly==0.0.10
-huggingface_hub==0.24.7
+huggingface_hub==0.30.2
 jax>=0.4.30
 jaxlib>=0.4.30
 Jinja2
@@ -29,7 +29,7 @@ tensorboardx==2.6.2.2
 tensorflow>=2.17.0
 tensorflow-datasets>=4.9.6
 tokenizers==0.21.0
-torch==2.6.0
+torch==2.5.1
 torchvision==0.20.1
 transformers==4.48.1
 aqtp
