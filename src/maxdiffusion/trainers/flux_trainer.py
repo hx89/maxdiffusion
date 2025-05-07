@@ -76,7 +76,6 @@ class FluxTrainer(FluxCheckpointer):
     return per_device_tflops
 
   def start_training(self):
-
     # Hook
     # self.pre_training_steps()
     # Load checkpoint - will load or create states
@@ -348,9 +347,13 @@ class FluxTrainer(FluxCheckpointer):
       example_batch = load_next_batch(data_iterator, example_batch, self.config)
       example_batch = {key: jnp.asarray(value, dtype=self.config.activations_dtype) for key, value in example_batch.items()}
 
-      with jax.profiler.StepTraceAnnotation("train", step_num=step):
+      if self.config.profiler == 'nsys':
         with self.mesh:
           flux_state, train_metric, train_rngs = p_train_step(flux_state, example_batch, train_rngs)
+      else:
+        with jax.profiler.StepTraceAnnotation("train", step_num=step):
+          with self.mesh:
+            flux_state, train_metric, train_rngs = p_train_step(flux_state, example_batch, train_rngs)
 
       samples_count = self.total_train_batch_size * (step + 1)
       new_time = datetime.datetime.now()
