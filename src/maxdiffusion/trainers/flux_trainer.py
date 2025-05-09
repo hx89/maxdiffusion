@@ -251,6 +251,7 @@ class FluxTrainer(FluxCheckpointer):
         t5_tokenizer=pipeline.t5_tokenizer,
         clip_text_encoder=pipeline.clip_encoder,
         t5_text_encoder=pipeline.t5_encoder,
+        max_sequence_length=config.max_sequence_length,
         encode_in_batches=True,
         encode_batch_size=16,
     )

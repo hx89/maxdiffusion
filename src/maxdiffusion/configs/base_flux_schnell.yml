@@ -244,6 +244,7 @@ guidance_scale: 0.0
 # Based on 3.4. in https://arxiv.org/pdf/2305.08891.pdf
 guidance_rescale: 0.0
 num_inference_steps: 4
+save_final_checkpoint: False
 
 # SDXL Lightning parameters
 lightning_from_pt: True
