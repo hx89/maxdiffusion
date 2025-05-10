@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -ux
 
-MODEL_CONFIG=${1:-"train/benchmark/configs/tpu.yaml"}
-USE_PGLE=${2:-0}
+USE_PGLE=${1:-0}
+MODEL_CONFIG=${2:-"src/maxdiffusion/configs/base_flux_schnell.yml"}
 
 export CODE_DIR=${CODE_DIR:-"."}
 export LOG_DIR=${LOG_DIR:-"."}
@@ -87,9 +87,7 @@ if [ $USE_PGLE -eq 1 ]; then
     export XLA_FLAGS=$BASE_XLA_FLAGS" --xla_gpu_enable_latency_hiding_scheduler=false --xla_gpu_disable_async_collectives=allreduce,allgather,reducescatter,collectivebroadcast,alltoall,collectivepermute"
     echo $XLA_FLAGS
 
-    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 -m train.$PROJECT_NAME \
-        --checkpoint.run_name $RUN_NAME \
-        --config $MODEL_CONFIG
+    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py src/maxdiffusion/configs/base_flux_schnell.yml hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
 
     echo "generate pbtxt"
     export PGLE_PROFILE_PATH=${NSYS_OUTPUT_FILE}.pbtxt
@@ -99,9 +97,7 @@ if [ $USE_PGLE -eq 1 ]; then
     export XLA_FLAGS=$BASE_XLA_FLAGS" --xla_gpu_enable_latency_hiding_scheduler=true --xla_gpu_pgle_profile_file_or_directory_path=$PGLE_PROFILE_PATH"
     echo $XLA_FLAGS
 
-    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 -m train.$PROJECT_NAME \
-        --checkpoint.run_name $RUN_NAME \
-        --config $MODEL_CONFIG
+    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py src/maxdiffusion/configs/base_flux_schnell.yml hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
 else
     echo "PGLE is disabled"
     NSYS_OUTPUT_FILE="${LOG_DIR}/normal-run"
