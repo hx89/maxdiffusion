@@ -22,6 +22,7 @@ sed -i 's|^tensorflow>=|tensorflow-cpu>=|' "${SRC_PATH_MAXDIFFUSION}/${REQUIREME
 # Install CPU-only PyTorch
 sed -i '/^torch==/ s/$/+cpu/' "${SRC_PATH_MAXDIFFUSION}/${REQUIREMENTS_FILE}"
 sed -i 's|^huggingface-hub==.*|huggingface-hub==0.24.7|' "${SRC_PATH_MAXDIFFUSION}/${REQUIREMENTS_FILE}"
+sed -i 's|^huggingface_hub==.*|huggingface_hub==0.30.0|' "${SRC_PATH_MAXDIFFUSION}/${REQUIREMENTS_FILE}"
 echo "--extra-index-url https://download.pytorch.org/whl/cpu" >> /opt/pip-tools.d/requirements-maxdiffusion.in
 # Skip torchvision
 sed -i 's|^torchvision|#torchvision|' "${SRC_PATH_MAXDIFFUSION}/${REQUIREMENTS_FILE}"
