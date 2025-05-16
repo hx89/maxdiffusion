@@ -23,7 +23,7 @@ export BASE_XLA_FLAGS="
                 --xla_disable_hlo_passes=rematerialization
                 --xla_gpu_enable_command_buffer= 
                 --xla_gpu_enable_triton_gemm=false
-                --xla_dump_to=/tmp/xla_dump
+                --xla_dump_to=${LOG_DIR}/xla_dump
                 --xla_gpu_graph_level=0"
                 # --xla_dump_hlo_pass_re=.*
                 # --xla_gpu_enable_nccl_user_buffers=true
@@ -111,7 +111,7 @@ else
     # nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py src/maxdiffusion/configs/base_flux_dev.yml hardware=gpu save_final_checkpoint=False run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys
     # nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py src/maxdiffusion/configs/base_flux_schnell.yml hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
 
-    # nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
-    python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=xplane 
+    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
+    # python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=xplane 
 fi
 set +x
