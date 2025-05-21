@@ -501,7 +501,8 @@ class FluxTransformer2DModel(nn.Module, FlaxModelMixin, ConfigMixin):
     ids = jnp.concatenate((txt_ids, img_ids), axis=0)
     ids = nn.with_logical_constraint(ids, ("activation_batch", None))
     image_rotary_emb = self.pe_embedder(ids)
-    image_rotary_emb = nn.with_logical_constraint(image_rotary_emb, ("activation_batch", "activation_embed"))
+    # image_rotary_emb = nn.with_logical_constraint(image_rotary_emb, ("activation_batch", "activation_embed"))
+    image_rotary_emb = nn.with_logical_constraint(image_rotary_emb, (None, None))
 
     for double_block in self.double_blocks:
       hidden_states, encoder_hidden_states = double_block(

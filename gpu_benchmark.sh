@@ -24,9 +24,11 @@ export BASE_XLA_FLAGS="
                 --xla_gpu_enable_command_buffer= 
                 --xla_gpu_enable_triton_gemm=false
                 --xla_dump_to=${LOG_DIR}/xla_dump
+		--xla_gpu_exhaustive_tiling_search=true
+		--xla_gpu_experimental_parallel_collective_overlap_limit=32
                 --xla_gpu_graph_level=0"
-                # --xla_dump_hlo_pass_re=.*
                 # --xla_gpu_enable_nccl_user_buffers=true
+                # --xla_dump_hlo_pass_re=.*
                 # --xla_gpu_enable_command_buffer=FUSION,CUBLAS,CUBLASLT,CUSTOM_CALL,CUDNN,COLLECTIVES,CONDITIONAL,DYNAMIC_SLICE_FUSION"
 
 # # no overlap
@@ -75,6 +77,13 @@ export BASE_XLA_FLAGS="
 export NVTE_FUSED_ATTN=1
 export XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
 
+# For multi process run
+export NNODES=8
+export NODE_RANK=$SLURM_PROCID
+export JAX_COORDINATOR_IP=${SLURM_LAUNCH_NODE_IPADDR}
+export JAX_COORDINATOR_PORT=12345
+export GPUS_PER_NODE=8
+
 PROJECT_NAME=benchmark
 RUN_NAME=test
 #uv run
@@ -115,3 +124,4 @@ else
     # python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=xplane 
 fi
 set +x
+
