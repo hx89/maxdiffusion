@@ -24,9 +24,9 @@ export BASE_XLA_FLAGS="
                 --xla_gpu_enable_command_buffer= 
                 --xla_gpu_enable_triton_gemm=false
                 --xla_dump_to=${LOG_DIR}/xla_dump
-		--xla_gpu_exhaustive_tiling_search=true
-		--xla_gpu_experimental_parallel_collective_overlap_limit=32
+                --xla_gpu_exhaustive_tiling_search=true
                 --xla_gpu_graph_level=0"
+                # --xla_gpu_experimental_parallel_collective_overlap_limit=32
                 # --xla_gpu_enable_nccl_user_buffers=true
                 # --xla_dump_hlo_pass_re=.*
                 # --xla_gpu_enable_command_buffer=FUSION,CUBLAS,CUBLASLT,CUSTOM_CALL,CUDNN,COLLECTIVES,CONDITIONAL,DYNAMIC_SLICE_FUSION"
@@ -78,11 +78,18 @@ export NVTE_FUSED_ATTN=1
 export XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
 
 # For multi process run
-export NNODES=8
-export NODE_RANK=$SLURM_PROCID
-export JAX_COORDINATOR_IP=${SLURM_LAUNCH_NODE_IPADDR}
-export JAX_COORDINATOR_PORT=12345
-export GPUS_PER_NODE=8
+if [ -n "${SLURM_NTASKS_PER_NODE:-}" ] && [ $SLURM_NTASKS_PER_NODE -gt 1 ]; then
+    echo "SLURM Configuration:"
+    echo "Tasks per node: $SLURM_NTASKS_PER_NODE"
+    echo "Total tasks: $SLURM_NTASKS"
+    echo "Number of nodes: $SLURM_NNODES"
+    echo "Node ID: $SLURM_NODEID"
+    export NNODES=8
+    export NODE_RANK=$SLURM_PROCID
+    export JAX_COORDINATOR_IP=${SLURM_LAUNCH_NODE_IPADDR}
+    export JAX_COORDINATOR_PORT=12345
+    export GPUS_PER_NODE=8
+fi
 
 PROJECT_NAME=benchmark
 RUN_NAME=test
