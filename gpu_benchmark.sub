@@ -31,7 +31,11 @@ CODE_DIR=/opt/maxdiffusion
 
 BASE_HUGGINGFACE_CACHE_DIR='/lustre/fsw/coreai_mlperf_training/users/haixinl/midjourney/huggingface_cache/huggingface'
 HUGGINGFACE_CACHE_DIR='/root/.cache/huggingface'
-MOUNTS="--container-mounts=$BASE_WORKSPACE_DIR:$WORKSPACE_DIR,$BASE_CODE_DIR:$CODE_DIR,$BASE_HUGGINGFACE_CACHE_DIR:$HUGGINGFACE_CACHE_DIR"
+if [ -n "$HF_TOKEN" ]; then
+    MOUNTS="--container-mounts=$BASE_WORKSPACE_DIR:$WORKSPACE_DIR,$BASE_CODE_DIR:$CODE_DIR"
+else
+    MOUNTS="--container-mounts=$BASE_WORKSPACE_DIR:$WORKSPACE_DIR,$BASE_CODE_DIR:$CODE_DIR,$BASE_HUGGINGFACE_CACHE_DIR:$HUGGINGFACE_CACHE_DIR"
+fi
 
 EXPORTS="--export=ALL"
 
@@ -60,3 +64,4 @@ EOF
 echo $cmd
 srun -o $OUTFILE -e $OUTFILE --container-image="$CONTAINER" $MOUNTS $EXPORTS bash -e -c "${cmd}"
 set +x
+

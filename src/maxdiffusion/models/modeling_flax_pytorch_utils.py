@@ -66,7 +66,8 @@ def torch2jax(torch_tensor: torch.Tensor) -> Array:
     torch_tensor = torch_tensor.to("cpu")
 
   numpy_value = torch_tensor.numpy()
-  jax_array = jnp.array(numpy_value, dtype=jnp.bfloat16 if is_bfloat16 else None)
+  cpu = jax.local_devices(backend="cpu")[0]
+  jax_array = jnp.array(numpy_value, dtype=jnp.bfloat16 if is_bfloat16 else None, device=cpu)
   return jax_array
 
 
