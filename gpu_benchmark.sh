@@ -4,6 +4,7 @@ set -ux
 USE_PGLE=${1:-0}
 MODEL_CONFIG=${2:-"src/maxdiffusion/configs/base_flux_schnell.yml"}
 
+export HF_TOKEN=${HF_TOKEN:-""}
 export CODE_DIR=${CODE_DIR:-"."}
 export LOG_DIR=${LOG_DIR:-"."}
 
@@ -89,6 +90,10 @@ if [ -n "${SLURM_NTASKS_PER_NODE:-}" ] && [ $SLURM_NTASKS_PER_NODE -gt 1 ]; then
     export JAX_COORDINATOR_IP=${SLURM_LAUNCH_NODE_IPADDR}
     export JAX_COORDINATOR_PORT=12345
     export GPUS_PER_NODE=8
+fi
+
+if [ -n "$HF_TOKEN" ]; then
+    huggingface-cli login --token $HF_TOKEN
 fi
 
 PROJECT_NAME=benchmark

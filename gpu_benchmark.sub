@@ -18,6 +18,7 @@ set -eux
 
 CONFIG=${CONFIG:-"/opt/maxdiffusion/src/maxdiffusion/configs/base_flux_schnell.yml"}
 USE_PGLE=${USE_PGLE:-0}
+HF_TOKEN=${HF_TOKEN:-""}
 
 CONTAINER=gitlab-master.nvidia.com/haixinl/container_repo/maxdiffusion:jax-2025_3_20-nvls-fix-nccl-227
 # CONTAINER=gitlab-master.nvidia.com/abgoel/paxml-containers:haiku-nightly-04-15-25-nccl-ub-reg 
@@ -52,7 +53,7 @@ cmd="$(cat <<EOF
 echo "*******STARTING********"
 cd ${CODE_DIR}
 nvidia-smi
-LOG_DIR=${LOG_DIR_LOCAL} CODE_DIR=${CODE_DIR} bash $BASE_SCRIPT ${USE_PGLE} ${CONFIG} 
+HF_TOKEN=${HF_TOKEN} LOG_DIR=${LOG_DIR_LOCAL} CODE_DIR=${CODE_DIR} bash $BASE_SCRIPT ${USE_PGLE} ${CONFIG} 
 EOF
 )"
 
