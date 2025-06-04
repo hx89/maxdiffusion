@@ -96,7 +96,8 @@ class FluxSingleTransformerBlock(nn.Module):
     self.linear2 = nn.Dense(
         self.dim,
         kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("mlp", "embed")),
-        bias_init=nn.with_logical_partitioning(nn.initializers.zeros, ("embed",)),
+        # bias_init=nn.with_logical_partitioning(nn.initializers.zeros, ("embed",)),
+        bias_init=nn.with_logical_partitioning(nn.initializers.zeros, (None,)),
         dtype=self.dtype,
         param_dtype=self.weights_dtype,
         precision=self.precision,
@@ -218,7 +219,8 @@ class FluxTransformerBlock(nn.Module):
             nn.Dense(
                 self.dim,
                 use_bias=True,
-                kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+                # kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+                kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("mlp", "embed")),
                 bias_init=nn.with_logical_partitioning(nn.initializers.zeros, ("mlp",)),
                 dtype=self.dtype,
                 param_dtype=self.weights_dtype,
@@ -249,7 +251,8 @@ class FluxTransformerBlock(nn.Module):
             nn.Dense(
                 self.dim,
                 use_bias=True,
-                kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+                # kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+                kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("mlp", "embed")),
                 bias_init=nn.with_logical_partitioning(nn.initializers.zeros, ("mlp",)),
                 dtype=self.dtype,
                 param_dtype=self.weights_dtype,
@@ -483,6 +486,9 @@ class FluxTransformer2DModel(nn.Module, FlaxModelMixin, ConfigMixin):
   ):
     hidden_states = self.img_in(hidden_states)
     timestep = self.timestep_embedding(timestep, 256)
+
+    timestep = nn.with_logical_constraint(timestep, ("activation_batch", None))
+
     if self.guidance_embeds:
       guidance = self.timestep_embedding(guidance, 256)
     else:
@@ -492,6 +498,9 @@ class FluxTransformer2DModel(nn.Module, FlaxModelMixin, ConfigMixin):
         if guidance is None
         else self.time_text_embed(timestep, guidance, pooled_projections)
     )
+
+    temb = nn.with_logical_constraint(temb, ("activation_batch", None))
+
     encoder_hidden_states = self.txt_in(encoder_hidden_states)
     if txt_ids.ndim == 3:
       txt_ids = txt_ids[0]
