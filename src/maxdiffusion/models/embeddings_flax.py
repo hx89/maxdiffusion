@@ -139,7 +139,8 @@ class PixArtAlphaTextProjection(nn.Module):
   def __call__(self, caption):
     hidden_states = nn.Dense(
         self.hidden_size,
-        kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+        # kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+        kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), (None, "mlp")),
         bias_init=nn.with_logical_partitioning(nn.initializers.zeros, ("mlp",)),
         use_bias=True,
         dtype=self.dtype,
@@ -157,7 +158,8 @@ class PixArtAlphaTextProjection(nn.Module):
 
     hidden_states = nn.Dense(
         self.hidden_size,
-        kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+        # kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), ("embed", "mlp")),
+        kernel_init=nn.with_logical_partitioning(nn.initializers.lecun_normal(), (None, "mlp")),
         bias_init=nn.with_logical_partitioning(nn.initializers.zeros, ("mlp",)),
         use_bias=True,
         dtype=self.dtype,
