@@ -134,7 +134,7 @@ else
     # nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py src/maxdiffusion/configs/base_flux_dev.yml hardware=gpu save_final_checkpoint=False run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys
     # nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py src/maxdiffusion/configs/base_flux_schnell.yml hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
 
-    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=20 enable_profiler=True profiler_steps=5 skip_first_n_steps_for_profiler=10 profiler=nsys 
+    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=20 enable_profiler=True profiler_steps=5 skip_first_n_steps_for_profiler=10 profiler=nsys train_new_flux=True
     # python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=xplane 
 fi
 set +x

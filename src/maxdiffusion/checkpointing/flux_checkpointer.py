@@ -103,6 +103,9 @@ class FluxCheckpointer(ABC):
         checkpoint_item=checkpoint_item_name,
         training=is_training,
     )
+    print('self.config.train_new_flux is: ', self.config.train_new_flux)
+    print('jax.devices is: ', jax.devices())
+    print('jax.local_devices is: ', jax.local_devices())
     if not self.config.train_new_flux:
       flux_state = flux_state.replace(params=transformer_params)
       flux_state = jax.device_put(flux_state, state_mesh_shardings)

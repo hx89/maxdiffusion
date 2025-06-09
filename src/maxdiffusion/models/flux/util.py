@@ -39,6 +39,36 @@ class ModelSpec:
   repo_id: str | None
   repo_flow: str | None
 
+import subprocess
+
+def run_nvidia_smi():
+    result = subprocess.run(["nvidia-smi"], capture_output=True, text=True)
+    print(result.stdout)
+
+def get_gpu_memory():
+    cmd = [
+        "nvidia-smi",
+        "--query-gpu=memory.used,memory.total",
+        "--format=csv,noheader,nounits"
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    for line in result.stdout.strip().split("\n"):
+        used, total = map(int, line.split(","))
+        print(f"Used: {used} MiB / Total: {total} MiB")
+
+print("CUDA_VISIBLE_DEVICES:", os.environ.get("CUDA_VISIBLE_DEVICES"))
+print("JAX_PLATFORM:", os.environ.get("JAX_PLATFORM"))
+print("JAX_PLATFORM_NAME:", os.environ.get("JAX_PLATFORM_NAME"))
+print("JAX Process index:", jax.process_index())
+print("JAX devices:", jax.devices())
+print("jax.devices('cpu'):", jax.devices('cpu'))
+print("Local devices:", jax.local_devices())
+
+print('before run_nvidia_smi')
+run_nvidia_smi()
+print('after run_nvidia_smi')
+get_gpu_memory()
+print('after get_gpu_memory')
 
 configs = {
     "flux-dev": ModelSpec(
