@@ -26,9 +26,9 @@ export BASE_XLA_FLAGS="
                 --xla_gpu_enable_triton_gemm=false
                 --xla_dump_to=${LOG_DIR}/xla_dump
                 --xla_gpu_exhaustive_tiling_search=true
+                --xla_gpu_enable_nccl_user_buffers=true
                 --xla_gpu_graph_level=0"
                 # --xla_gpu_experimental_parallel_collective_overlap_limit=32
-                # --xla_gpu_enable_nccl_user_buffers=true
                 # --xla_dump_hlo_pass_re=.*
                 # --xla_gpu_enable_command_buffer=FUSION,CUBLAS,CUBLASLT,CUSTOM_CALL,CUDNN,COLLECTIVES,CONDITIONAL,DYNAMIC_SLICE_FUSION"
 
@@ -65,9 +65,9 @@ export BASE_XLA_FLAGS="
 # #export GCS_READ_REQUEST_TIMEOUT_SECS=300
 # #export GCS_WRITE_REQUEST_TIMEOUT_SECS=600
 
-# export NCCL_OPTIMAL_CTAS=1
+export NCCL_OPTIMAL_CTAS=1
 # export NCCL_ALGO=NVLS
-# export NCCL_NVLS_ENABLE=1
+export NCCL_NVLS_ENABLE=1
 # export NCCL_DEBUG=INFO
 # export NCCL_DEBUG_SUBSYS=NVLS,COLL,P2P,TUNING
 
@@ -110,7 +110,7 @@ if [ $USE_PGLE -eq 1 ]; then
     echo $XLA_FLAGS
 
     # nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
-    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=20 enable_profiler=True profiler_steps=5 skip_first_n_steps_for_profiler=10 profiler=nsys 
+    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=20 enable_profiler=True profiler_steps=5 skip_first_n_steps_for_profiler=10 profiler=nsys train_new_flux=True
 
     echo "generate pbtxt"
     export PGLE_PROFILE_PATH=${NSYS_OUTPUT_FILE}.pbtxt
@@ -121,7 +121,7 @@ if [ $USE_PGLE -eq 1 ]; then
     echo $XLA_FLAGS
 
     # nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=10 enable_profiler=True profiler_steps=2 profiler=nsys 
-    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=20 enable_profiler=True profiler_steps=5 skip_first_n_steps_for_profiler=10 profiler=nsys 
+    nsys profile -t cuda,nvtx -o ${NSYS_OUTPUT_FILE} --cuda-graph-trace=node --force-overwrite=true --capture-range=cudaProfilerApi --capture-range-end=stop python3 src/maxdiffusion/train_flux.py $MODEL_CONFIG hardware=gpu run_name=flux attention=cudnn_flash_te max_train_steps=20 enable_profiler=True profiler_steps=5 skip_first_n_steps_for_profiler=10 profiler=nsys train_new_flux=True 
 else
     echo "PGLE is disabled"
     NSYS_OUTPUT_FILE="${LOG_DIR}/normal-run"
