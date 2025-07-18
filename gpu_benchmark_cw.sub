@@ -1,0 +1,69 @@
+#!/bin/bash
+#SBATCH -A coreai_dlalgo_llm              # slurm account
+#SBATCH -p batch            # slurm partition name
+#SBATCH -N 1                    # number of nodes
+#SBATCH -t 00:30:00             # wall time
+#SBATCH -J "coreai_mlperf_training-flux.test"         # job name
+#SBATCH --exclusive             # exclusive node access
+#SBATCH --mem=0                 # all mem avail
+#SBATCH --ntasks-per-node=1     # n tasks per machine (one task per gpu)
+#SBATCH --overcommit
+#SBATCH --dependency=singleton  # only run one instance at a time
+#SBATCH --gres=gpu:8 
+
+# Run command: 
+# sbatch -N 1 --ntasks-per-node=8 -t 00:30:00 gpu_benchmark.sub 
+
+set -eux
+
+CONFIG=${CONFIG:-"/opt/maxdiffusion/src/maxdiffusion/configs/base_flux_schnell.yml"}
+USE_PGLE=${USE_PGLE:-0}
+HF_TOKEN=${HF_TOKEN:-""}
+
+CONTAINER=gitlab-master.nvidia.com/haixinl/container_repo/maxdiffusion:2025_6_12-nccl-227
+# CONTAINER=gitlab-master.nvidia.com/haixinl/container_repo/maxdiffusion:jax-2025_3_20-nvls-fix-nccl-227
+# CONTAINER=gitlab-master.nvidia.com/haixinl/container_repo/maxdiffusion:jax-2025_3_20-nvls-fix-nccl-227-maxunrollfactor8-sm10-schedule-fix
+# CONTAINER=gitlab-master.nvidia.com/abgoel/paxml-containers:haiku-nightly-04-15-25-nccl-ub-reg 
+
+BASE_WORKSPACE_DIR="/lustre/fsw/portfolios/coreai/users/haixinl/maxdiffusion/workspace" ## location to write logs and checkpoints to
+WORKSPACE_DIR=/opt/workspace
+
+BASE_CODE_DIR="/lustre/fsw/portfolios/coreai/users/haixinl/my_code/maxdiffusion"
+CODE_DIR=/opt/maxdiffusion
+
+BASE_HUGGINGFACE_CACHE_DIR='/lustre/fsw/portfolios/coreai/users/haixinl/midjourney/huggingface_cache/huggingface'
+HUGGINGFACE_CACHE_DIR='/root/.cache/huggingface'
+if [ -n "$HF_TOKEN" ]; then
+    MOUNTS="--container-mounts=$BASE_WORKSPACE_DIR:$WORKSPACE_DIR,$BASE_CODE_DIR:$CODE_DIR"
+else
+    MOUNTS="--container-mounts=$BASE_WORKSPACE_DIR:$WORKSPACE_DIR,$BASE_CODE_DIR:$CODE_DIR,$BASE_HUGGINGFACE_CACHE_DIR:$HUGGINGFACE_CACHE_DIR"
+fi
+
+EXPORTS="--export=ALL"
+
+export BASE_SCRIPT="$CODE_DIR/gpu_benchmark.sh"
+# export CONFIG="$CODE_DIR/benchmark/$CONFIG"
+
+# Get the current timestamp
+TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+# Append the timestamp to EXPT_ID
+EXPT_ID="${SLURM_JOB_ID}_${TIMESTAMP}"
+
+OUTPUT_DIR="${BASE_WORKSPACE_DIR}/outputs/${EXPT_ID}"
+mkdir -p ${OUTPUT_DIR}
+OUTFILE="${OUTPUT_DIR}/output-%j-%n-%t.txt"
+
+LOG_DIR_LOCAL="${WORKSPACE_DIR}/outputs/${EXPT_ID}"
+
+cmd="$(cat <<EOF
+echo "*******STARTING********"
+cd ${CODE_DIR}
+nvidia-smi
+HF_TOKEN=${HF_TOKEN} LOG_DIR=${LOG_DIR_LOCAL} CODE_DIR=${CODE_DIR} bash $BASE_SCRIPT ${USE_PGLE} ${CONFIG} 
+EOF
+)"
+
+echo $cmd
+srun -o $OUTFILE -e $OUTFILE --container-image="$CONTAINER" $MOUNTS $EXPORTS bash -e -c "${cmd}"
+set +x
+
