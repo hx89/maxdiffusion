@@ -61,6 +61,9 @@ from jax.experimental.pallas.ops.tpu.splash_attention import splash_attention_ke
 from tensorboardX import writer
 
 from google.cloud import storage
+from ctypes import cdll
+
+libcudart = cdll.LoadLibrary("libcudart.so")
 
 FrozenDict = core.frozen_dict.FrozenDict
 
@@ -78,13 +81,17 @@ def l2norm_pytree(x):
 
 def activate_profiler(config):
   if jax.process_index() == 0 and config.enable_profiler:
-    jax.profiler.start_trace(config.tensorboard_dir)
-
+    if config.profiler == 'nsys':
+      libcudart.cudaProfilerStart()
+    else:
+      jax.profiler.start_trace(config.tensorboard_dir)
 
 def deactivate_profiler(config):
   if jax.process_index() == 0 and config.enable_profiler:
-    jax.profiler.stop_trace()
-
+    if config.profiler == 'nsys':
+      libcudart.cudaProfilerStop()
+    else:
+      jax.profiler.stop_trace()
 
 def initialize_summary_writer(config):
   return writer.SummaryWriter(config.tensorboard_dir) if jax.process_index() == 0 else None
