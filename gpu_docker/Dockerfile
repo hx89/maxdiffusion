@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1-labs
-ARG BASE_IMAGE=ghcr.io/nvidia/jax-mealkit:jax-2025-08-04
+ARG BASE_IMAGE=ghcr.io/nvidia/jax-mealkit:jax-2025-09-29
 ARG URLREF_MAXDIFFUSION=https://github.com/AI-Hypercomputer/maxdiffusion.git#main
 # ARG URLREF_MAXDIFFUSION=https://github.com/hx89/maxdiffusion.git#haixinl/gpu_opt
 ARG SRC_PATH_MAXDIFFUSION=/opt/maxdiffusion
