@@ -47,11 +47,13 @@ def make_tf_iterator(
   else:
     train_ds = load_dataset(config.dataset_name, split=config.train_split)
     train_ds = train_ds.select_columns([config.caption_column, config.image_column])
+    # When cache_latents_text_encoder_outputs is True, we pass JAX models/states that cannot be pickled
+    # So we must use num_proc=None (single process, no multiprocessing) to avoid pickling
     train_ds = train_ds.map(
         function=tokenize_fn,
         batched=True,
         remove_columns=[config.caption_column],
-        num_proc=None,
+        num_proc=None if config.cache_latents_text_encoder_outputs else config.tokenize_captions_num_proc,
         desc="Running tokenizer on train dataset",
     )
     # need to do it before load_as_tf_dataset
@@ -61,7 +63,7 @@ def make_tf_iterator(
         function=image_transforms_fn,
         batched=True,
         remove_columns=[config.image_column],
-        num_proc=None,
+        num_proc=None if config.cache_latents_text_encoder_outputs else config.transform_images_num_proc,
         desc="Transforming images",
     )
     if config.cache_latents_text_encoder_outputs:

@@ -183,7 +183,16 @@ class FluxTrainer(FluxCheckpointer):
     return shaped_batch
 
   def get_data_shardings(self):
-    data_sharding = jax.sharding.NamedSharding(self.mesh, P(*self.config.data_sharding))
+    # Handle both nested and flat data_sharding config formats
+    if isinstance(self.config.data_sharding[0], list):
+      # Nested format: [['data', 'fsdp', 'tensor']] -> unpack inner list
+      sharding_spec = P(*self.config.data_sharding[0])
+    else:
+      # Flat format: ['data', 'fsdp', 'tensor']
+      sharding_spec = P(*self.config.data_sharding)
+    
+    max_logging.log(f"DEBUG: data_sharding config={self.config.data_sharding}, resulting spec={sharding_spec}")
+    data_sharding = jax.sharding.NamedSharding(self.mesh, sharding_spec)
     data_sharding = {
         "text_embeds": data_sharding,
         "input_ids": data_sharding,
@@ -204,6 +213,9 @@ class FluxTrainer(FluxCheckpointer):
     examples["text_embeds"] = jnp.float16(prompt_embeds)
     examples["input_ids"] = jnp.float16(text_ids)
     examples["prompt_embeds"] = jnp.float16(pooled_prompt_embeds)
+    
+    # Debug logging
+    print(f"DEBUG tokenize_captions: text_embeds shape={examples['text_embeds'].shape}, input_ids shape={examples['input_ids'].shape}, prompt_embeds shape={examples['prompt_embeds'].shape}")
 
     return examples
 
@@ -239,6 +251,9 @@ class FluxTrainer(FluxCheckpointer):
 
     examples["pixel_values"] = jnp.float16(images)
     examples["img_ids"] = jnp.float16(img_ids)
+    
+    # Debug logging
+    print(f"DEBUG transform_images: pixel_values shape={examples['pixel_values'].shape}, img_ids shape={examples['img_ids'].shape}")
 
     return examples
 
@@ -348,6 +363,12 @@ class FluxTrainer(FluxCheckpointer):
         max_utils.activate_profiler(self.config)
 
       example_batch = load_next_batch(data_iterator, example_batch, self.config)
+      # Debug: print types and shapes
+      if step == start_step:
+        max_logging.log("=== DEBUG: Batch data types and shapes ===")
+        for key, value in example_batch.items():
+          max_logging.log(f"  {key}: type={type(value).__name__}, shape={getattr(value, 'shape', 'N/A')}, dtype={getattr(value, 'dtype', 'N/A')}")
+        max_logging.log("==========================================")
       example_batch = {key: jnp.asarray(value, dtype=self.config.activations_dtype) for key, value in example_batch.items()}
 
       if self.config.profiler == "nsys":

@@ -314,8 +314,21 @@ def unbox_logicallypartioned_trainstate(boxed_train_state: train_state.TrainStat
   Returns:
     a TrainState where all all LogicallyPartitioned leaves have been unboxed.
   """
+  def _unbox_if_not_abstract(x):
+    if isinstance(x, flax.linen.spmd.LogicallyPartitioned):
+      # Check if the value inside is abstract (ShapedArray/ShapeDtypeStruct)
+      # If so, we can't unbox it as sharding constraints don't work on abstract values
+      inner_value = x.value
+      if isinstance(inner_value, (jax.core.ShapedArray, jax.ShapeDtypeStruct)):
+        # For abstract values, just return the value without applying sharding constraints
+        return inner_value
+      else:
+        # For concrete values, unbox normally
+        return x.unbox()
+    return x
+  
   return jax.tree_util.tree_map(
-      lambda x: (x.unbox() if isinstance(x, flax.linen.spmd.LogicallyPartitioned) else x),
+      _unbox_if_not_abstract,
       boxed_train_state,
       is_leaf=lambda k: isinstance(k, flax.linen.spmd.LogicallyPartitioned),
   )
